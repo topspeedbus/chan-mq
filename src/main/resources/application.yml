@@ -1,0 +1,35 @@
+server:
+  port: 8088
+  servlet:
+    context-path: /
+spring:
+  application:
+    name: chan-mq
+
+  rabbitmq:
+    host: 192.168.217.128
+    port: 5672
+    username: dev
+    password: dev
+    virtual-host: my_vhost
+    #配置生产者
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      mandatory: true
+    #配置消费者
+    listener:
+      #配置单绑定
+      direct:
+        acknowledge-mode: manual
+        #限流（海量数据，同时只能过来一条）
+        prefetch: 1
+        retry:
+          max-interval: 5000
+          max-attempts: 3
+      #配置其他模式
+      simple:
+        concurrency: 5
+        max-concurrency: 10
+        acknowledge-mode: manual
+        prefetch: 1
