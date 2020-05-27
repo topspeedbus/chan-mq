@@ -9,9 +9,9 @@ spring:
   rabbitmq:
     host: 192.168.217.128
     port: 5672
-    username: dev
-    password: dev
-    virtual-host: my_vhost
+    username: guest
+    password: guest
+    virtual-host: /
     #配置生产者
     publisher-confirm-type: correlated
     publisher-returns: true
@@ -32,4 +32,6 @@ spring:
         concurrency: 5
         max-concurrency: 10
         acknowledge-mode: manual
+        #prefetch-count:当多个消费者订阅同一队列时，rabbit采用轮询方式分发消息（m%n:m为消息数，n为消费者数量），prefetch设置每个消费者最多获取的消息数量，
+        #当达到这个数量时，消费者必须确认消费完消息才能重新从队列获取消息
         prefetch: 1
