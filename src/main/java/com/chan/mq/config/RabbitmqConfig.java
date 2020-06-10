@@ -3,6 +3,7 @@ package com.chan.mq.config;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.config.DirectRabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionListener;
@@ -63,9 +64,10 @@ public class RabbitmqConfig {
         /**
          * 限制允许连接总数
          */
-        cachingConnectionFactory.setConnectionLimit(10);
+//        cachingConnectionFactory.setConnectionLimit(20);
         cachingConnectionFactory.setPublisherConfirmType(CachingConnectionFactory.ConfirmType.CORRELATED);
         cachingConnectionFactory.setPublisherReturns(true);
+//        cachingConnectionFactory.setChannelCacheSize(20);
 //        cachingConnectionFactory.setConnectionListeners(null);
         return cachingConnectionFactory;
     }
@@ -94,6 +96,15 @@ public class RabbitmqConfig {
     }
 
 
+    @Bean
+    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(ConnectionFactory connectionFactory) {
+        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+        factory.setConnectionFactory(connectionFactory);
+        factory.setMessageConverter(new Jackson2JsonMessageConverter());
+        factory.setPrefetchCount(1);
+        factory.setConcurrentConsumers(5);
+        return factory;
+    }
 
 
 

@@ -26,13 +26,15 @@ import java.util.Map;
         */
         value = @Queue(value = "queue_test1", durable = "true"),
         exchange = @Exchange(name = "test.topic.ex", type = "topic"),
-        key = "topic.test.#"), ackMode = "MANUAL", containerFactory = "")
+        key = "topic.test.#"), ackMode = "MANUAL")
 public class TestTopicReceiver1 {
     @RabbitHandler
     public void onTestMsg(@Payload String message, @Headers Map<String, Object> headers, Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) Long tag) {
         Long deliveryTag = (Long) headers.get(AmqpHeaders.DELIVERY_TAG);
         try {
             System.out.println("test1收到消息，开始消费--------------> " + message);
+            System.out.println("tag: " + tag);
+
             channel.basicAck(deliveryTag, false);
         } catch (Exception e) {
             try {

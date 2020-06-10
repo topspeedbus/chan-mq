@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
+import javax.sound.midi.Soundbank;
 import java.util.Arrays;
 
 /**
@@ -22,12 +23,15 @@ public class ChanApplicationListener implements ApplicationListener<ListenerCont
     public void onApplicationEvent(ListenerContainerConsumerFailedEvent event) {
         log.error("消费者失败事件发生：{}", event);
 
-        if (event.isFatal()) {
             log.error(String.format("Stopping container from aborted consumer. Reason::%s.",
                     event.getReason()), event.getThrowable());
             SimpleMessageListenerContainer container = (SimpleMessageListenerContainer) event.getSource();
             String queueNames = Arrays.toString(container.getQueueNames());
+        System.out.println(container);
+        System.out.println("queueName:" + queueNames);
             // 重启
+
+        if (event.isFatal()) {
             try {
                 restart(container);
                 log.info("重启队列%s的监听成功！", queueNames);

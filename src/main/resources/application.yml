@@ -9,8 +9,8 @@ spring:
   rabbitmq:
     host: 192.168.217.128
     port: 5672
-    username: guest
-    password: guest
+    username: admin
+    password: admin
     virtual-host: /
     #配置生产者
     publisher-confirm-type: correlated

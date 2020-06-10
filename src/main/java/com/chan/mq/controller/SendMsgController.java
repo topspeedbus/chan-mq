@@ -25,7 +25,22 @@ public class SendMsgController {
 
     @GetMapping("")
     public void test(@RequestParam(value = "message") String message) {
-        rabbitTemplate.convertAndSend("test.topic.ex", "topic.test.demo", message);
+        MessagePostProcessor messagePostProcessor = msg -> {
+            MessageProperties messageProperties = msg.getMessageProperties();
+            // 设置编码
+            messageProperties.setContentEncoding("utf-8");
+            // 设置过期时间10*1000毫秒
+//            messageProperties.setExpiration("5000");
+            //消息定位：实现幂等
+            messageProperties.setCorrelationId("243987701");
+            //持久化三点：交换机，队列，消息。调用：fsync指令非实时，消息无法完全做到不流失。设置消息持久化：注意影响性能
+            messageProperties.setDeliveryMode(MessageDeliveryMode.PERSISTENT);
+            messageProperties.setHeader("hello", "1111111111");
+            return msg;
+        };
+
+
+        rabbitTemplate.convertAndSend("test.topic.ex", "topic.test.demo", message, messagePostProcessor);
     }
 
     @GetMapping("v1")
@@ -46,12 +61,12 @@ public class SendMsgController {
             // 设置过期时间10*1000毫秒
             messageProperties.setExpiration("5000");
             //消息定位：实现幂等
-            messageProperties.setCorrelationId("");
-            messageProperties.getCorrelationId();
+            messageProperties.setCorrelationId("243987701");
             //持久化三点：交换机，队列，消息。调用：fsync指令非实时，消息无法完全做到不流失。设置消息持久化：注意影响性能
             messageProperties.setDeliveryMode(MessageDeliveryMode.PERSISTENT);
-            messageProperties.setHeader("hello", "1");
+            messageProperties.setHeader("hello", "1111111111");
             return msg;
-        };        rabbitTemplate.convertAndSend("test_dead_ex", "test_dead_routing_key", message + "------>" + new Date(), messagePostProcessor);
+        };
+        rabbitTemplate.convertAndSend("test_dead_ex", "test_dead_routing_key", message + "------>" + new Date(), messagePostProcessor);
     }
 }

@@ -19,14 +19,17 @@ import java.util.Map;
 @RabbitListener(bindings = @QueueBinding(
         value = @Queue(value = "queue_test2", durable = "true"),
         exchange = @Exchange(name = "test.topic.ex", type = "topic", ignoreDeclarationExceptions = "true"),
-        key = "topic.test.*"))
+        key = "topic.test.*"), ackMode = "MANUAL")
 public class TestTopicReceiver2 {
     @RabbitHandler
     public void onTestMsg(@Payload String message, @Headers Map<String, Object> headers, Channel channel) {
         Long deliveryTag = (Long) headers.get(AmqpHeaders.DELIVERY_TAG);
         try {
-            Object o = headers.get(AmqpHeaders.CORRELATION_ID);
             System.out.println("test2收到消息，开始消费--------------> " + message);
+            Object o = headers.get(AmqpHeaders.CORRELATION_ID);
+            Object hello = headers.get("hello");
+            System.out.println(hello);
+            System.out.println(o);
             channel.basicAck(deliveryTag, false);
         } catch (Exception e) {
             try {

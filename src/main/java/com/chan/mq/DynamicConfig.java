@@ -63,7 +63,7 @@ public class DynamicConfig {
     }
 
 
-    @PostConstruct
+//    @PostConstruct
     public void test() throws InterruptedException {
         Object o = properties.get("test.me");
         System.out.println(o);
