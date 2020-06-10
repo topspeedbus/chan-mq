@@ -26,7 +26,7 @@ public class TestDeadReceiver {
     /**
      * 属性占位符（${some.property}）或SpEL表达式（）
      */
-    @RabbitListener(queues = "REDIRECT_QUEUE")
+    @RabbitListener(queues = "REDIRECT_QUEUE", ackMode = "MANUAL")
     @RabbitHandler
     public void onTestMsg(@Payload String message, @Headers Map<String, Object> headers, Channel channel) {
         Long deliveryTag = (Long) headers.get(AmqpHeaders.DELIVERY_TAG);

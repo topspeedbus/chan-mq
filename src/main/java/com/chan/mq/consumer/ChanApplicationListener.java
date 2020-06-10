@@ -34,9 +34,9 @@ public class ChanApplicationListener implements ApplicationListener<ListenerCont
         if (event.isFatal()) {
             try {
                 restart(container);
-                log.info("重启队列%s的监听成功！", queueNames);
+                log.info("重启队列:{}的监听成功！", queueNames);
             } catch (Exception e) {
-                log.error(String.format("重启队列%s的监听失败！", queueNames), e);
+                log.error("重启队列:{}的监听失败！", queueNames, e);
             }
 
 
