@@ -50,6 +50,7 @@ public class SendMsgController {
             messageProperties.getCorrelationId();
             //持久化三点：交换机，队列，消息。调用：fsync指令非实时，消息无法完全做到不流失。设置消息持久化：注意影响性能
             messageProperties.setDeliveryMode(MessageDeliveryMode.PERSISTENT);
+            messageProperties.setHeader("hello", "1");
             return msg;
         };        rabbitTemplate.convertAndSend("test_dead_ex", "test_dead_routing_key", message + "------>" + new Date(), messagePostProcessor);
     }

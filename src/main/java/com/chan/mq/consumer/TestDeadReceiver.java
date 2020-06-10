@@ -2,6 +2,8 @@ package com.chan.mq.consumer;
 
 import com.rabbitmq.client.Channel;
 import org.springframework.amqp.rabbit.annotation.*;
+import org.springframework.amqp.rabbit.listener.DirectMessageListenerContainer;
+import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -17,8 +19,14 @@ import java.util.Map;
  * @describe:
  */
 @Component
-@RabbitListener(queues = "REDIRECT_QUEUE")
+
 public class TestDeadReceiver {
+
+
+    /**
+     * 属性占位符（${some.property}）或SpEL表达式（）
+     */
+    @RabbitListener(queues = "REDIRECT_QUEUE")
     @RabbitHandler
     public void onTestMsg(@Payload String message, @Headers Map<String, Object> headers, Channel channel) {
         Long deliveryTag = (Long) headers.get(AmqpHeaders.DELIVERY_TAG);
@@ -33,5 +41,12 @@ public class TestDeadReceiver {
                 ex.printStackTrace();
             }
         }
+    }
+
+    public SimpleMessageListenerContainer simpleMessageListenerContainer() {
+        SimpleMessageListenerContainer simpleMessageListenerContainer = new SimpleMessageListenerContainer();
+//        simpleMessageListenerContainer.setRetryDeclarationInterval();
+//        simpleMessageListenerContainer.setConsumerStartTimeout();
+        return simpleMessageListenerContainer;
     }
 }

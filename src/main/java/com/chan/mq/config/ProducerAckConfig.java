@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -34,8 +35,11 @@ public class ProducerAckConfig implements RabbitTemplate.ConfirmCallback, Rabbit
     public void confirm(CorrelationData correlationData, boolean ack, String cause) {
         if (ack) {
             System.out.println("消息发送成功" +  correlationData);
+            System.out.println("消息发送成功" +  cause);
             log.debug("消息发送成功：{}", correlationData);
+            log.debug("消息发送成功：{}", cause);
         } else {
+            System.out.println("消息发送失败" + correlationData);
             System.out.println("消息发送失败" + cause);
             log.error("消息发送失败:{}", cause);
         }

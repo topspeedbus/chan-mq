@@ -1,8 +1,21 @@
 package com.chan.mq.config;
 
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.annotation.EnableRabbit;
+import org.springframework.amqp.rabbit.config.DirectRabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionListener;
+import org.springframework.amqp.rabbit.core.DeclareExchangeConnectionListener;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +26,75 @@ import java.util.Map;
  * @description:
  **/
 @Configuration
+@EnableRabbit
 public class RabbitmqConfig {
+
+    @Value("${spring.rabbitmq.host}")
+    private String addresses;
+
+    @Value("${spring.rabbitmq.username}")
+    private String username;
+
+    @Value("${spring.rabbitmq.password}")
+    private String password;
+
+    @Value("${spring.rabbitmq.virtual-host}")
+    private String virtualHost;
+
+    @Value("${spring.rabbitmq.port}")
+    private Integer port;
+
+    @Bean
+    public ConnectionFactory connectionFactory() {
+        /**
+         * 生产者和消费者使用同一个cachingConnectionFactory阻塞一个，另一个也无法连接broker
+         */
+        CachingConnectionFactory cachingConnectionFactory = new CachingConnectionFactory();
+        cachingConnectionFactory.setAddresses(addresses);
+        cachingConnectionFactory.setUsername(username);
+        cachingConnectionFactory.setPassword(password);
+        cachingConnectionFactory.setVirtualHost(virtualHost);
+        cachingConnectionFactory.setPort(port);
+//        cachingConnectionFactory.setCacheMode();
+        // 如果消息要设置成回调，则以下的配置必须要设置成true
+
+//        ConnectionListener connectionListener = new DirectRabbitListenerContainerFactory();
+
+        /**
+         * 限制允许连接总数
+         */
+        cachingConnectionFactory.setConnectionLimit(10);
+        cachingConnectionFactory.setPublisherConfirmType(CachingConnectionFactory.ConfirmType.CORRELATED);
+        cachingConnectionFactory.setPublisherReturns(true);
+//        cachingConnectionFactory.setConnectionListeners(null);
+        return cachingConnectionFactory;
+    }
+
+    @Bean(name = "rabbitTemplate")
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
+        RabbitTemplate template = new RabbitTemplate(connectionFactory);
+        template.setMandatory(true);
+        template.setMessageConverter(new Jackson2JsonMessageConverter());
+        return template;
+    }
+
+
+    /**
+     * 配置rabbit-admin
+     * @param connectionFactory
+     * @return
+     */
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public RabbitAdmin rabbitAdmin(ConnectionFactory connectionFactory) {
+        RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
+
+        return rabbitAdmin;
+    }
+
+
+
 
 
     /**
