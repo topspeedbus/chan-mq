@@ -49,7 +49,7 @@ public class SendMsgController {
        System.out.println("ReturnCallback1:     " + "回应信息：" + replyText);
        System.out.println("ReturnCallback1:     " + "交换机：" + exchange);
        System.out.println("ReturnCallback1:     " + "路由键：" + routingKey);
-       log.error("消息：{}， msgStr:{}, 应答码：{}， 原因：{}， 交换器：{}， 路由键：{}",
+       log.error("消息：{}， 应答码：{}， 原因：{}， 交换器：{}， 路由键：{}",
                new String(message.getBody()),
                replyCode,
                replyText,

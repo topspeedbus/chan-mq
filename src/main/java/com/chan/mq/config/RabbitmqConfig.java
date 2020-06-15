@@ -87,33 +87,65 @@ public class RabbitmqConfig {
      * @param connectionFactory
      * @return
      */
+//    @Bean
+//    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+//    public RabbitAdmin rabbitAdmin(ConnectionFactory connectionFactory) {
+//        RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
+//
+//        return rabbitAdmin;
+//    }
+
+
     @Bean
-    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public RabbitAdmin rabbitAdmin(ConnectionFactory connectionFactory) {
-        RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
-
-        return rabbitAdmin;
-    }
-
-
-    @Bean
-    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(ConnectionFactory connectionFactory) {
+    public SimpleRabbitListenerContainerFactory simpleRabbitListenerContainerFactory(ConnectionFactory connectionFactory) {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
         factory.setMessageConverter(new Jackson2JsonMessageConverter());
         factory.setPrefetchCount(1);
+        /**
+         * 容器启动就会创建这个数量的线程监听该队列，可设置taskExecutor 设置线程池策略
+         * io密集型可多设置
+         */
         factory.setConcurrentConsumers(5);
         return factory;
     }
 
+    @Bean
+    public DirectRabbitListenerContainerFactory directRabbitListenerContainerFactory(ConnectionFactory connectionFactory) {
+        DirectRabbitListenerContainerFactory factory = new DirectRabbitListenerContainerFactory();
+        factory.setConnectionFactory(connectionFactory);
+        factory.setMessageConverter(new Jackson2JsonMessageConverter());
+        factory.setPrefetchCount(1);
+        factory.setConsumersPerQueue(5);
+        return factory;
+    }
 
+
+
+
+
+
+    @Value("${chan.mq.queue2}")
+    private String deadLetterQueue;
+
+    @Value("${chan.key2}")
+    private String deadLetterRoutingKey;
+
+    @Value("${chan.key1}")
+    private String surviveRoutingKey;
+
+    @Value("${chan.x-dead.ex2}")
+    private String deadLetterEx;
+
+    @Value("${chan.x-dead.ex1}")
+    private String surviveDeadLetterEx;
 
     /**
      * 声明交换机，任意类型
      */
     @Bean
     public DirectExchange deadLetterEx() {
-        return new DirectExchange("test_dead_ex", true, false);
+        return new DirectExchange(deadLetterEx, true, false);
     }
     /**
      * 声明一个死信队列. x-dead-letter-exchange 对应 死信交换机 x-dead-letter-routing-key 对应
@@ -121,25 +153,28 @@ public class RabbitmqConfig {
      */
     @Bean("deadLetterQueue")
     public Queue deadLetterQueue() {
-        Map<String, Object> args = new HashMap<>(2);
-        // x-dead-letter-exchange 声明 死信交换机
-        args.put("x-dead-letter-exchange", "test_dead_ex");
-        // x-dead-letter-routing-key 声明 死信路由键
-        args.put("x-dead-letter-routing-key", "test_dead_redirect");
-        return QueueBuilder.durable("test_dead_queque").withArguments(args).build();
+//        Map<String, Object> args = new HashMap<>(2);
+//        // x-dead-letter-exchange 声明 死信交换机
+//        args.put("x-dead-letter-exchange", "test_dead_ex");
+//        // x-dead-letter-routing-key 声明 死信路由键
+//        args.put("x-dead-letter-routing-key", "test_dead_redirect");
+//        args.put("x-dead-letter-routing-key", "test_dead_redirect");
+
+        /**
+         * durable 持久化：该队列创建一次，如果要改动ttl，必须手动删除队列
+         */
+        return QueueBuilder.durable(deadLetterQueue).autoDelete().deadLetterExchange(surviveDeadLetterEx).deadLetterRoutingKey(surviveRoutingKey).build();
     }
 
-
-
-    /**
+    /**0
      * 定义死信队列转发队列.
      *
      * @return the queue
      */
-    @Bean("redirectQueue")
-    public Queue redirectQueue() {
-        return QueueBuilder.durable("REDIRECT_QUEUE").build();
-    }
+//    @Bean("redirectQueue")
+//    public Queue redirectQueue() {
+//        return QueueBuilder.durable("REDIRECT_QUEUE").build();
+//    }
 
     /**
      * 死信路由通过 DL_KEY 绑定键绑定到死信队列上.
@@ -148,16 +183,46 @@ public class RabbitmqConfig {
      */
     @Bean
     public Binding deadLetterBinding() {
-        return new Binding("test_dead_queque", Binding.DestinationType.QUEUE, "test_dead_ex", "test_dead_routing_key", null);
+//        return new Binding("test_dead_queque", Binding.DestinationType.QUEUE, "test_dead_ex", "test_dead_routing_key", null);
+        return BindingBuilder.bind(deadLetterQueue()).to(deadLetterEx()).with(deadLetterRoutingKey);
     }
+
+//    public CustomExchange customExchange
 
     /**
      * 死信路由通过 KEY_R 绑定键绑定到死信队列上.
      *
      * @return the binding
      */
+//    @Bean
+//    public Binding redirectBinding() {
+////        return new Binding("REDIRECT_QUEUE", Binding.DestinationType.QUEUE, "test_dead_ex", "test_dead_redirect", null);
+//        return BindingBuilder.bind(redirectQueue()).to(deadLetterEx()).with("test_dead_redirect");
+//    }
+
+
     @Bean
-    public Binding redirectBinding() {
-        return new Binding("REDIRECT_QUEUE", Binding.DestinationType.QUEUE, "test_dead_ex", "test_dead_redirect", null);
+    public CustomExchange delayExchange(){
+        Map<String, Object> args = new HashMap<>();
+        args.put("x-delayed-type", "direct");
+        return new CustomExchange("delay_exchange","x-delayed-message",true, false, args);
+    }
+
+    /**
+     * 延时队列
+     * @return
+     */
+    @Bean
+    public Queue delayQueue(){
+        return new Queue("delay_queue",true);
+    }
+
+    /**
+     * 给延时队列绑定交换机
+     * @return
+     */
+    @Bean
+    public Binding myDelayBinding(){
+        return BindingBuilder.bind(delayQueue()).to(delayExchange()).with("delay_key").noargs();
     }
 }

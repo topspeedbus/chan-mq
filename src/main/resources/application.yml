@@ -2,12 +2,17 @@ server:
   port: 8088
   servlet:
     context-path: /
+  tomcat:
+    connection-timeout: 30000
+    max-threads: 200
+    uri-encoding: utf-8
+    max-connections: 500
 spring:
   application:
     name: chan-mq
 
   rabbitmq:
-    host: 192.168.217.128
+    host: 192.168.136.128
     port: 5672
     username: admin
     password: admin
@@ -40,3 +45,13 @@ spring:
     cache:
       channel:
         size: 25
+
+chan:
+  mq:
+    queue1: REDIRECT_QUEUE
+    queue2: test_dead_queque
+  x-dead:
+    ex2: test_dead_ex
+    ex1: test_dead_redirect_ex
+  key1: test_dead_redirect
+  key2: test_dead_routing_key

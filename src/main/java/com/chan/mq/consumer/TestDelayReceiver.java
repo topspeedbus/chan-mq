@@ -1,9 +1,8 @@
 package com.chan.mq.consumer;
 
 import com.rabbitmq.client.Channel;
+import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.*;
-import org.springframework.amqp.rabbit.listener.DirectMessageListenerContainer;
-import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -12,31 +11,31 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author: chen
- * @date: 2020/5/11 - 20:49
+ * @date: 2020/6/13 - 17:20
  * @describe:
  */
-//@Component
+@Component
+public class TestDelayReceiver {
+    private static volatile int I = 0;
+    @RabbitListener(queues = "delay_queue", ackMode = "MANUAL")
 
-public class TestDeadReceiver {
-
-    /**
-     * 属性占位符（${some.property}）或SpEL表达式（）
-     */
-//    @RabbitListener(queues = "REDIRECT_QUEUE", ackMode = "MANUAL")
-    @RabbitListener(bindings = @QueueBinding(
-            value = @Queue(value = "${chan.mq.queue1}"),
-            exchange = @Exchange(value = "${chan.x-dead.ex1}"),
-            key = "${chan.key1}"),
-            ackMode = "MANUAL")
+//    @RabbitListener(bindings = @QueueBinding(
+//            value = @Queue(value = "delay_queue"),
+//            exchange = @Exchange(value = "delay_exchange"),
+//            key = "delay_key"),
+//            ackMode = "MANUAL")
     @RabbitHandler
     public void onTestMsg(@Payload String message, @Headers Map<String, Object> headers, Channel channel) {
+            ++ I;
+        System.out.println("last===:" + I);
         Long deliveryTag = (Long) headers.get(AmqpHeaders.DELIVERY_TAG);
         try {
-            System.out.println("现在时间： " + new Date());
-            System.out.println("test1收到消息，开始消费--------------> " + message);
+            System.out.println("现在时间2222： " + new Date());
+            System.out.println("test2222收到消息，开始消费--------------> " + message);
             channel.basicAck(deliveryTag, false);
         } catch (Exception e) {
             try {
@@ -46,4 +45,5 @@ public class TestDeadReceiver {
             }
         }
     }
+
 }
