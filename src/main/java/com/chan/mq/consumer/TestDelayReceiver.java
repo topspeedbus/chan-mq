@@ -18,7 +18,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @date: 2020/6/13 - 17:20
  * @describe:
  */
-@Component
+//@Component
 public class TestDelayReceiver {
     private static volatile int I = 0;
     @RabbitListener(queues = "delay_queue", ackMode = "MANUAL")

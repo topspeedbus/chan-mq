@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.MessagePostProcessor;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -52,8 +53,7 @@ public class SendDelayMsgPlugsController {
                 routingKey);
     };
 
-//    @Value("${chan.x-dead.ex}")
-//    private String deadEx;
+
 
     /**
      * 插件版
@@ -101,5 +101,14 @@ public class SendDelayMsgPlugsController {
 //        rabbitTemplate.convertAndSend("test_dead_ex", "test_dead_routing_key", message + "------>" + new Date(), messagePostProcessor);
 //        rabbitTemplate.convertAndSend(RabbitMQConstant.DEFAULT_EXCHANGE, RabbitMQConstant.DEFAULT_KEY,
 //                message + "------>" + new Date(), messagePostProcessor);
+    }
+
+
+    @Value("${spring.profiles.active}")
+    private String profile;
+    @GetMapping("v3")
+    public void test2(@RequestParam(value = "message") String message,
+                      @RequestParam Integer ttl) {
+        System.out.println(profile);
     }
 }

@@ -18,7 +18,7 @@ import java.util.Map;
  * @date: 2020/5/11 - 20:49
  * @describe:
  */
-//@Component
+@Component
 
 public class TestDeadReceiver {
 
@@ -27,9 +27,9 @@ public class TestDeadReceiver {
      */
 //    @RabbitListener(queues = "REDIRECT_QUEUE", ackMode = "MANUAL")
     @RabbitListener(bindings = @QueueBinding(
-            value = @Queue(value = "${chan.mq.queue1}"),
-            exchange = @Exchange(value = "${chan.x-dead.ex1}"),
-            key = "${chan.key1}"),
+            value = @Queue(value = "${chan.test.queue}"),
+            exchange = @Exchange(value = "${chan.test.ex}"),
+            key = "${chan.test.key}"),
             ackMode = "MANUAL")
     @RabbitHandler
     public void onTestMsg(@Payload String message, @Headers Map<String, Object> headers, Channel channel) {

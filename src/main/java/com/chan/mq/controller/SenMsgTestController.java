@@ -94,6 +94,20 @@ public class SenMsgTestController {
     }
 
 
+    @Value("${chan.test.ex}")
+    private String deadEx;
+
+    @Value("${chan.test.key}")
+    private String key;
+
+    @GetMapping("v5")
+    public void test5(@RequestParam(value = "message") String message,
+                      @RequestParam Integer ttl) {
+
+        rabbitTemplate.convertAndSend(deadEx, key, message);
+    }
+
+
 
 
 }

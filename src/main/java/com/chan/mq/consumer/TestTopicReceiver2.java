@@ -15,7 +15,7 @@ import java.util.Map;
  * @date: 2020/5/11 - 20:49
  * @describe:
  */
-@Component
+//@Component
 @RabbitListener(bindings = @QueueBinding(
         value = @Queue(value = "queue_test2", durable = "true"),
         exchange = @Exchange(name = "test.topic.ex", type = "topic", ignoreDeclarationExceptions = "true"),

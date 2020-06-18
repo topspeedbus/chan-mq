@@ -120,11 +120,6 @@ public class RabbitmqConfig {
         return factory;
     }
 
-
-
-
-
-
     @Value("${chan.mq.queue2}")
     private String deadLetterQueue;
 
@@ -147,10 +142,12 @@ public class RabbitmqConfig {
     public DirectExchange deadLetterEx() {
         return new DirectExchange(deadLetterEx, true, false);
     }
+
     /**
      * 声明一个死信队列. x-dead-letter-exchange 对应 死信交换机 x-dead-letter-routing-key 对应
      * 死信队列
      */
+
     @Bean("deadLetterQueue")
     public Queue deadLetterQueue() {
 //        Map<String, Object> args = new HashMap<>(2);
@@ -159,14 +156,13 @@ public class RabbitmqConfig {
 //        // x-dead-letter-routing-key 声明 死信路由键
 //        args.put("x-dead-letter-routing-key", "test_dead_redirect");
 //        args.put("x-dead-letter-routing-key", "test_dead_redirect");
-
         /**
          * durable 持久化：该队列创建一次，如果要改动ttl，必须手动删除队列
          */
         return QueueBuilder.durable(deadLetterQueue).autoDelete().deadLetterExchange(surviveDeadLetterEx).deadLetterRoutingKey(surviveRoutingKey).build();
     }
 
-    /**0
+    /**
      * 定义死信队列转发队列.
      *
      * @return the queue

@@ -16,7 +16,7 @@ import java.util.Map;
  * @date: 2020/5/11 - 20:49
  * @describe:
  */
-@Component
+//@Component
 /**
  * 放在类级别，可指定多个 @RabbitHandler,根据传入参数的不同，重载出多个方法
  */
